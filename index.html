@@ -276,13 +276,7 @@
     width: 100%;
     height: auto;
     display: block;
-    /* mix-blend-mode 제거 — 알파 PNG는 자연 렌더링이 가장 안전 */
-    filter:
-      contrast(1.02)
-      saturate(0.95)
-      drop-shadow(0 2px 18px rgba(28, 25, 23, 0.06));
     opacity: 0.95;
-    /* 가장자리 페이드는 유지 */
     -webkit-mask-image: linear-gradient(to bottom right, #000 58%, transparent 100%);
             mask-image: linear-gradient(to bottom right, #000 58%, transparent 100%);
   }
