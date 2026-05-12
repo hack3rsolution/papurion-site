@@ -1,0 +1,787 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Papurion · AI 기반 취약점 점검 서비스</title>
+<meta name="description" content="Papurion은 AI를 활용한 취약점 점검 서비스입니다. 검증된 오픈소스 스캐너와 AI 분석을 결합하여 코드와 인프라의 약점을 발견합니다." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;500;600&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    --paper:        #f5f1e8;
+    --paper-deep:   #ebe5d6;
+    --paper-deeper: #ddd5c0;
+    --ink:          #1c1917;
+    --ink-soft:     #57534e;
+    --ink-faint:    #8a847b;
+    --accent:       #2c5f7f;
+    --rule:         rgba(28, 25, 23, 0.08);
+    --rule-strong:  rgba(28, 25, 23, 0.16);
+
+    --serif: "Noto Serif KR", "Times New Roman", serif;
+    --sans:  "Inter", "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+    --mono:  "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+
+    --gutter: clamp(24px, 5vw, 72px);
+    --max:    1280px;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-weight: 300;
+    line-height: 1.6;
+    font-size: 16px;
+    overflow-x: hidden;
+  }
+
+  /* Paper grain — fixed, full-page, very subtle */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 200;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='320' height='320'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' seed='5'/><feColorMatrix values='0 0 0 0 0.11  0 0 0 0 0.10  0 0 0 0 0.09  0 0 0 0.45 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.35'/></svg>");
+    opacity: 0.5;
+    mix-blend-mode: multiply;
+  }
+
+  ::selection { background: rgba(44, 95, 127, 0.18); }
+
+  a { color: inherit; text-decoration: none; }
+
+  /* ===================== Typography ===================== */
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.6em;
+  }
+  .eyebrow::before {
+    content: "—";
+    color: var(--ink-faint);
+    font-family: var(--sans);
+    letter-spacing: 0;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--serif);
+    font-weight: 300;
+    color: var(--ink);
+    margin: 0;
+    letter-spacing: -0.01em;
+    text-wrap: pretty;
+    word-break: keep-all;
+    line-break: strict;
+  }
+
+  .display {
+    font-size: clamp(32px, 4.2vw, 54px);
+    line-height: 1.28;
+    font-weight: 300;
+  }
+  .display strong {
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .section-h {
+    font-size: clamp(28px, 3.8vw, 46px);
+    line-height: 1.25;
+    font-weight: 300;
+  }
+  .section-h strong {
+    font-weight: 600;
+  }
+
+  .lead {
+    font-family: var(--serif);
+    font-weight: 300;
+    font-size: clamp(15px, 1.25vw, 18px);
+    line-height: 1.85;
+    color: var(--ink-soft);
+    max-width: 56ch;
+  }
+
+  p { margin: 0; }
+
+  /* ===================== Container ===================== */
+  .wrap {
+    max-width: var(--max);
+    margin: 0 auto;
+    padding: 0 var(--gutter);
+  }
+
+  /* ===================== Header ===================== */
+  header.site {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: color-mix(in srgb, var(--paper) 88%, transparent);
+    backdrop-filter: saturate(140%) blur(8px);
+    -webkit-backdrop-filter: saturate(140%) blur(8px);
+    border-bottom: 1px solid var(--rule);
+  }
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 72px;
+  }
+  .wordmark {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 20px;
+    letter-spacing: -0.01em;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.5em;
+  }
+  .wordmark::after {
+    content: "";
+    display: none;
+  }
+
+  nav.primary {
+    display: flex;
+    align-items: center;
+    gap: 36px;
+  }
+  nav.primary a {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--ink-soft);
+    transition: color 200ms ease;
+  }
+  nav.primary a:hover { color: var(--ink); }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 11px 22px;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1;
+    font-family: var(--sans);
+    border-radius: 0;
+    cursor: pointer;
+    transition: background 200ms ease, color 200ms ease, border-color 200ms ease;
+    white-space: nowrap;
+  }
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--ink);
+    color: var(--ink);
+  }
+  .btn-outline:hover { background: var(--ink); color: var(--paper); }
+
+  .btn-filled {
+    background: var(--ink);
+    border: 1px solid var(--ink);
+    color: var(--paper);
+    padding: 14px 28px;
+    font-size: 15px;
+  }
+  .btn-filled:hover { background: #000; }
+
+  .btn-text {
+    background: transparent;
+    border: none;
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15px;
+    padding: 14px 0;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .btn-text::after {
+    content: "→";
+    transition: transform 200ms ease;
+  }
+  .btn-text:hover::after { transform: translateX(4px); }
+
+  /* ===================== Hero ===================== */
+  .hero {
+    position: relative;
+    min-height: calc(100vh - 72px);
+    padding-top: clamp(40px, 8vh, 96px);
+    padding-bottom: clamp(60px, 10vh, 120px);
+    overflow: hidden;
+  }
+  .hero-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: clamp(32px, 4vw, 80px);
+    align-items: center;
+    min-height: calc(100vh - 72px - clamp(100px, 18vh, 216px));
+  }
+  .hero-text {
+    max-width: 56ch;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+  .hero h1 {
+    margin-top: 28px;
+  }
+  .hero h1 .line2 {
+    display: block;
+    color: var(--ink-soft);
+    font-weight: 300;
+    margin-top: 0.2em;
+  }
+  .hero .sub {
+    font-size: 16px;
+    line-height: 1.85;
+    color: var(--ink-soft);
+    max-width: 48ch;
+    margin-top: 4px;
+  }
+  .hero .ctas {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-top: 12px;
+  }
+
+  /* Dragon — drawn-on-paper, not embedded */
+  .dragon-stage {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    width: 100%;
+    max-width: 720px;
+    justify-self: end;
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+  }
+  .dragon-stage img {
+    width: 100%;
+    height: auto;
+    display: block;
+    /* mix-blend-mode 제거 — 알파 PNG는 자연 렌더링이 가장 안전 */
+    filter:
+      contrast(1.02)
+      saturate(0.95)
+      drop-shadow(0 2px 18px rgba(28, 25, 23, 0.06));
+    opacity: 0.95;
+    /* 가장자리 페이드는 유지 */
+    -webkit-mask-image: linear-gradient(to bottom right, #000 58%, transparent 100%);
+            mask-image: linear-gradient(to bottom right, #000 58%, transparent 100%);
+  }
+
+  /* ===================== Section base ===================== */
+  section {
+    padding: clamp(80px, 12vh, 160px) 0;
+    position: relative;
+  }
+  .section-head {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    margin-bottom: clamp(56px, 8vh, 96px);
+    max-width: 720px;
+  }
+  .section-head .lead { margin-top: 8px; }
+
+  /* ===================== Trust strip ===================== */
+  .trust {
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    padding: 40px 0;
+    background: color-mix(in srgb, var(--paper-deep) 60%, var(--paper) 40%);
+  }
+  .trust-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 48px;
+  }
+  .trust-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .trust-item .label {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 16px;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+  .trust-item .desc {
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.65;
+    max-width: 32ch;
+  }
+  .trust-item .num {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    color: var(--ink-faint);
+    margin-bottom: 6px;
+  }
+
+  /* ===================== Approach — 三 stage ===================== */
+  .approach-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(40px, 5vw, 80px);
+    border-top: 1px solid var(--rule);
+    padding-top: clamp(48px, 6vh, 80px);
+  }
+  .approach-item {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  .approach-item .num-han {
+    font-family: var(--serif);
+    font-weight: 300;
+    font-size: clamp(64px, 7vw, 96px);
+    line-height: 1;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .approach-item h3 {
+    font-size: 22px;
+    font-weight: 500;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+  .approach-item h3 .han {
+    font-weight: 300;
+    color: var(--accent);
+    font-size: 18px;
+  }
+  .approach-item p {
+    font-size: 14.5px;
+    line-height: 1.85;
+    color: var(--ink-soft);
+    max-width: 32ch;
+  }
+
+  /* ===================== Isolation ===================== */
+  .isolation {
+    background: var(--paper-deep);
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    position: relative;
+    overflow: hidden;
+  }
+  /* faint dragon tail echo */
+  .isolation::before {
+    content: "";
+    position: absolute;
+    right: -8%;
+    bottom: -12%;
+    width: 60%;
+    max-width: 720px;
+    aspect-ratio: 1 / 1;
+    background-image: url("assets/papurion-dragon.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: bottom right;
+    opacity: 0.08;
+    -webkit-mask-image: radial-gradient(ellipse at 70% 70%, #000 30%, transparent 75%);
+            mask-image: radial-gradient(ellipse at 70% 70%, #000 30%, transparent 75%);
+    transform: scaleX(-1);
+    pointer-events: none;
+  }
+  .isolation > .wrap { position: relative; z-index: 1; }
+
+  .promises {
+    display: flex;
+    flex-direction: column;
+  }
+  .promise {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 40px;
+    padding: 36px 0;
+    border-top: 1px solid var(--rule);
+    align-items: baseline;
+  }
+  .promise:last-child {
+    border-bottom: 1px solid var(--rule);
+  }
+  .promise .han-num {
+    font-family: var(--serif);
+    font-weight: 300;
+    font-size: 28px;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .promise .body { display: flex; flex-direction: column; gap: 10px; max-width: 64ch; }
+  .promise h3 {
+    font-size: 19px;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+  .promise p {
+    font-size: 14.5px;
+    line-height: 1.8;
+    color: var(--ink-soft);
+  }
+
+  /* ===================== Final CTA ===================== */
+  .cta-final {
+    padding: clamp(120px, 18vh, 200px) 0;
+    text-align: left;
+  }
+  .cta-final .section-head {
+    margin-bottom: 48px;
+  }
+  .cta-final .quote-block {
+    font-family: var(--serif);
+    font-weight: 300;
+    font-size: clamp(15px, 1.2vw, 17px);
+    line-height: 1.85;
+    color: var(--ink-soft);
+    max-width: 52ch;
+    margin-bottom: 56px;
+  }
+  .cta-mail {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 14px;
+    padding: 18px 32px;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: var(--mono);
+    font-size: 15px;
+    letter-spacing: 0.02em;
+    transition: background 200ms ease;
+  }
+  .cta-mail:hover { background: #000; }
+  .cta-mail::after { content: "↗"; font-family: var(--sans); }
+
+  /* ===================== Footer ===================== */
+  footer.site {
+    border-top: 1px solid var(--rule);
+    padding: 72px 0 40px;
+    background: color-mix(in srgb, var(--paper-deep) 50%, var(--paper) 50%);
+  }
+  .footer-top {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr 1fr;
+    gap: 48px;
+    padding-bottom: 56px;
+  }
+  .footer-brand .mark {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 22px;
+    margin-bottom: 12px;
+  }
+  .footer-brand .tag {
+    font-size: 13px;
+    color: var(--ink-soft);
+    max-width: 28ch;
+    line-height: 1.7;
+  }
+  .footer-col h4 {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .footer-col ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .footer-col a {
+    font-size: 14px;
+    color: var(--ink-soft);
+    transition: color 200ms ease;
+  }
+  .footer-col a:hover { color: var(--ink); }
+  .footer-bottom {
+    border-top: 1px solid var(--rule);
+    padding-top: 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+  }
+
+  /* ===================== Responsive ===================== */
+  @media (max-width: 960px) {
+    nav.primary a:not(.btn) { display: none; }
+    .hero-inner { grid-template-columns: 1fr; gap: 24px; min-height: 0; }
+    .dragon-stage {
+      order: -1;
+      max-width: 420px;
+      margin: 0 auto;
+      justify-self: center;
+      aspect-ratio: 1 / 1;
+    }
+    .dragon-stage img { opacity: 0.6; }
+    .trust-grid { grid-template-columns: 1fr; gap: 32px; }
+    .approach-grid { grid-template-columns: 1fr; gap: 56px; }
+    .promise { grid-template-columns: 60px 1fr; gap: 20px; padding: 28px 0; }
+    .footer-top { grid-template-columns: 1fr 1fr; gap: 40px; }
+    .footer-brand { grid-column: 1 / -1; }
+  }
+  @media (max-width: 600px) {
+    .hero { padding-top: 24px; }
+    .hero .ctas { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .footer-top { grid-template-columns: 1fr; }
+    .footer-bottom { flex-direction: column; gap: 8px; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap header-inner">
+    <a href="#" class="wordmark" aria-label="Papurion 홈">Papurion</a>
+    <nav class="primary" aria-label="주 메뉴">
+      <a href="#approach">접근 방식</a>
+      <a href="#isolation">격리 약속</a>
+      <a href="#contact" class="btn btn-outline">상담 신청</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <!-- ========================= HERO ========================= -->
+  <section class="hero" data-screen-label="01 Hero">
+    <div class="wrap hero-inner">
+
+      <div class="hero-text">
+        <span class="eyebrow">AI Security</span>
+        <h1 class="display">
+          <strong>연 1회 점검으로는,<br />이제 부족합니다.</strong>
+          <span class="line2">흐르는 코드 속에서,<br />멈춰야 할 지점을 찾습니다.</span>
+        </h1>
+        <p class="sub">
+          Papurion은 AI를 활용한 취약점 점검 서비스입니다.
+          검증된 오픈소스 스캐너와 AI 분석을 결합하여
+          코드와 인프라의 약점을 발견하고 정리해 드립니다.
+        </p>
+        <div class="ctas">
+          <a href="#contact" class="btn btn-filled">상담 신청</a>
+          <a href="#approach" class="btn btn-text">접근 방식 보기</a>
+        </div>
+      </div>
+
+      <div class="dragon-stage" aria-hidden="true">
+        <img src="assets/papurion-dragon.png" alt="" />
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================= TRUST STRIP ========================= -->
+  <section class="trust" aria-label="신뢰 원칙" data-screen-label="02 Trust">
+    <div class="wrap trust-grid">
+      <div class="trust-item">
+        <div class="num">壹 / 01</div>
+        <div class="label">학습 미사용</div>
+        <p class="desc">고객 데이터는 AI 모델 학습에 사용되지 않습니다.</p>
+      </div>
+      <div class="trust-item">
+        <div class="num">貳 / 02</div>
+        <div class="label">전송 전 마스킹</div>
+        <p class="desc">민감 정보는 AI 전송 전 2단계 마스킹됩니다.</p>
+      </div>
+      <div class="trust-item">
+        <div class="num">參 / 03</div>
+        <div class="label">완전 격리</div>
+        <p class="desc">고객사별 독립 환경, 분석 후 즉시 폐기됩니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================= APPROACH ========================= -->
+  <section id="approach" data-screen-label="03 Approach">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Approach</span>
+        <h2 class="section-h">
+          발견은 빠르게,<br /><strong>판단은 사람이.</strong>
+        </h2>
+        <p class="lead">
+          취약점 발견에서 익스플로잇까지 걸리는 시간이
+          이제 수개월이 아니라 수시간입니다.
+          Papurion은 이 속도 변화를 인정하고 설계된
+          AI 보조 보안 점검 서비스입니다.
+        </p>
+      </div>
+
+      <div class="approach-grid">
+        <div class="approach-item">
+          <div class="num-han">一</div>
+          <h3>정찰 <span class="han">探</span></h3>
+          <p>
+            어택 서피스를 매핑합니다. 진입점, 외부 의존성, 노출된 자산을
+            식별하고 비즈니스 맥락에서 우선순위를 정합니다.
+          </p>
+        </div>
+        <div class="approach-item">
+          <div class="num-han">二</div>
+          <h3>탐지 <span class="han">察</span></h3>
+          <p>
+            검증된 오픈소스 스캐너와 AI 분석이 협력하여 취약점,
+            시크릿 노출, 의존성 위험을 발견합니다.
+          </p>
+        </div>
+        <div class="approach-item">
+          <div class="num-han">三</div>
+          <h3>판단 <span class="han">斷</span></h3>
+          <p>
+            AI 분류와 사람의 검토를 결합하여 false positive를 걸러내고,
+            실제 비즈니스 임팩트 기준으로 P0–P3 우선순위를 산정합니다.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================= ISOLATION ========================= -->
+  <section id="isolation" class="isolation" data-screen-label="04 Isolation">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Isolation by Design</span>
+        <h2 class="section-h">
+          격리는 기능이 아닙니다.<br /><strong>존재 이유입니다.</strong>
+        </h2>
+        <p class="lead">
+          보안 점검 서비스가 고객 데이터를 흘리면
+          그 서비스는 성립할 수 없습니다.
+          Papurion의 모든 결정은 격리 우선 원칙에서 출발합니다.
+        </p>
+      </div>
+
+      <div class="promises">
+        <div class="promise">
+          <div class="han-num">壹</div>
+          <div class="body">
+            <h3>고객 데이터는 AI 학습에 사용되지 않습니다.</h3>
+            <p>AI 제공사의 상업 약관에 따라 모델 학습에 사용되지 않으며, 단기 보관 후 자동 삭제됩니다.</p>
+          </div>
+        </div>
+        <div class="promise">
+          <div class="han-num">貳</div>
+          <div class="body">
+            <h3>민감 정보는 AI에 전송되기 전 마스킹됩니다.</h3>
+            <p>주민번호, 시크릿, 자격증명은 정규식과 AI 2단계 마스킹을 거쳐 전송됩니다.</p>
+          </div>
+        </div>
+        <div class="promise">
+          <div class="han-num">參</div>
+          <div class="body">
+            <h3>고객 코드는 분석 후 즉시 폐기됩니다.</h3>
+            <p>격리된 컨테이너 내에서만 분석되며, 작업 완료 후 안전 삭제됩니다.</p>
+          </div>
+        </div>
+        <div class="promise">
+          <div class="han-num">肆</div>
+          <div class="body">
+            <h3>고객사별 완전 격리 환경에서 분석됩니다.</h3>
+            <p>데이터베이스, API 키, 컨테이너, 네트워크가 고객별 독립 운영됩니다.</p>
+          </div>
+        </div>
+        <div class="promise">
+          <div class="han-num">伍</div>
+          <div class="body">
+            <h3>모든 처리는 개인정보처리위탁계약으로 보장됩니다.</h3>
+            <p>한국 개인정보보호법 및 국외이전 동의를 명시한 계약을 체결합니다.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================= FINAL CTA ========================= -->
+  <section id="contact" class="cta-final" data-screen-label="05 Contact">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Get Started</span>
+        <h2 class="section-h">
+          당신의 코드는,<br /><strong>이미 검토 가치가 있습니다.</strong>
+        </h2>
+      </div>
+      <p class="quote-block">
+        첫 점검은 NDA·DPA 체결 후 진행됩니다.<br />
+        30분 무료 상담으로 적합한 점검 범위를 함께 정의합니다.
+      </p>
+      <a href="mailto:contact@papurion.com" class="cta-mail">contact@papurion.com</a>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="mark">Papurion</div>
+        <p class="tag">AI 기반 취약점 점검 서비스</p>
+      </div>
+      <div class="footer-col">
+        <h4>Service</h4>
+        <ul>
+          <li><a href="#approach">접근 방식</a></li>
+          <li><a href="#isolation">격리 약속</a></li>
+          <li><a href="#contact">상담 신청</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <ul>
+          <li><a href="mailto:contact@papurion.com">contact@papurion.com</a></li>
+          <li><a href="mailto:security@papurion.com">security@papurion.com</a></li>
+          <li><a href="mailto:privacy@papurion.com">privacy@papurion.com</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="#">개인정보처리방침</a></li>
+          <li><a href="#">이용약관</a></li>
+          <li><a href="/.well-known/security.txt">security.txt</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Papurion. All rights reserved.</span>
+      <span>Papurion</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
