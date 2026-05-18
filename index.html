@@ -3,8 +3,13 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Papurion · AI 기반 취약점 점검 서비스</title>
-<meta name="description" content="Papurion은 AI를 활용한 취약점 점검 서비스입니다. 검증된 오픈소스 스캐너와 AI 분석을 결합하여 코드와 인프라의 약점을 발견합니다." />
+<title>Papurion · AI Agent 시대의 보안 플랫폼</title>
+<meta name="description" content="AI가 만든 코드, AI가 쓰는 도구, 둘 다 지켜줍니다. Papurion은 SAST·SCA·DAST·시크릿 스캔과 MCP 서버 보안 점검을 한 플랫폼에서 제공하는 AI 보안 솔루션입니다." />
+<meta property="og:title" content="Papurion · AI Agent 시대의 보안 플랫폼" />
+<meta property="og:description" content="코드부터 MCP 서버까지, AI가 만들고 AI가 쓰는 모든 것을 보호합니다." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://papurion.com" />
+<link rel="canonical" href="https://papurion.com/" />
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -19,8 +24,13 @@
     --ink-soft:     #57534e;
     --ink-faint:    #8a847b;
     --accent:       #2c5f7f;
+    --accent-soft:  rgba(44, 95, 127, 0.10);
     --rule:         rgba(28, 25, 23, 0.08);
     --rule-strong:  rgba(28, 25, 23, 0.16);
+    --terminal:     #161312;
+    --terminal-ink: #e8e1d2;
+    --crit:         #a83232;
+    --warn:         #b97a1f;
 
     --serif: "Noto Serif KR", "Times New Roman", serif;
     --sans:  "Inter", "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
@@ -32,7 +42,7 @@
 
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
-  html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+  html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; scroll-behavior: smooth; }
 
   body {
     background: var(--paper);
@@ -44,7 +54,6 @@
     overflow-x: hidden;
   }
 
-  /* Paper grain — fixed, full-page, very subtle */
   body::before {
     content: "";
     position: fixed;
@@ -95,19 +104,14 @@
     line-height: 1.28;
     font-weight: 300;
   }
-  .display strong {
-    font-weight: 600;
-    color: var(--ink);
-  }
+  .display strong { font-weight: 600; color: var(--ink); }
 
   .section-h {
     font-size: clamp(28px, 3.8vw, 46px);
     line-height: 1.25;
     font-weight: 300;
   }
-  .section-h strong {
-    font-weight: 600;
-  }
+  .section-h strong { font-weight: 600; }
 
   .lead {
     font-family: var(--serif);
@@ -148,19 +152,12 @@
     font-weight: 600;
     font-size: 20px;
     letter-spacing: -0.01em;
-    display: inline-flex;
-    align-items: baseline;
-    gap: 0.5em;
-  }
-  .wordmark::after {
-    content: "";
-    display: none;
   }
 
   nav.primary {
     display: flex;
     align-items: center;
-    gap: 36px;
+    gap: 32px;
   }
   nav.primary a {
     font-size: 14px;
@@ -181,24 +178,31 @@
     font-family: var(--sans);
     border-radius: 0;
     cursor: pointer;
-    transition: background 200ms ease, color 200ms ease, border-color 200ms ease;
+    transition: background 200ms ease, color 200ms ease, border-color 200ms ease, transform 200ms ease;
     white-space: nowrap;
+    border: 1px solid transparent;
   }
-  .btn-outline {
-    background: transparent;
-    border: 1px solid var(--ink);
-    color: var(--ink);
-  }
+  .btn-outline { background: transparent; border-color: var(--ink); color: var(--ink); }
   .btn-outline:hover { background: var(--ink); color: var(--paper); }
 
   .btn-filled {
     background: var(--ink);
-    border: 1px solid var(--ink);
+    border-color: var(--ink);
     color: var(--paper);
     padding: 14px 28px;
     font-size: 15px;
   }
   .btn-filled:hover { background: #000; }
+
+  .btn-ghost {
+    background: transparent;
+    border-color: var(--rule-strong);
+    color: var(--ink);
+    padding: 14px 24px;
+    font-size: 15px;
+    font-family: var(--mono);
+  }
+  .btn-ghost:hover { border-color: var(--ink); }
 
   .btn-text {
     background: transparent;
@@ -211,10 +215,7 @@
     align-items: baseline;
     gap: 10px;
   }
-  .btn-text::after {
-    content: "→";
-    transition: transform 200ms ease;
-  }
+  .btn-text::after { content: "→"; transition: transform 200ms ease; }
   .btn-text:hover::after { transform: translateX(4px); }
 
   /* ===================== Hero ===================== */
@@ -233,35 +234,39 @@
     min-height: calc(100vh - 72px - clamp(100px, 18vh, 216px));
   }
   .hero-text {
-    max-width: 56ch;
+    max-width: 58ch;
     display: flex;
     flex-direction: column;
-    gap: 32px;
+    gap: 28px;
   }
-  .hero h1 {
-    margin-top: 28px;
-  }
+  .hero h1 { margin-top: 24px; }
   .hero h1 .line2 {
     display: block;
     color: var(--ink-soft);
     font-weight: 300;
-    margin-top: 0.2em;
+    margin-top: 0.25em;
   }
   .hero .sub {
     font-size: 16px;
     line-height: 1.85;
     color: var(--ink-soft);
-    max-width: 48ch;
-    margin-top: 4px;
+    max-width: 52ch;
   }
   .hero .ctas {
     display: flex;
     align-items: center;
-    gap: 24px;
-    margin-top: 12px;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 4px;
+  }
+  .hero .micro {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink-faint);
+    letter-spacing: 0.08em;
+    margin-top: 8px;
   }
 
-  /* Dragon — drawn-on-paper, not embedded */
   .dragon-stage {
     position: relative;
     aspect-ratio: 1 / 1;
@@ -289,185 +294,464 @@
   .section-head {
     display: flex;
     flex-direction: column;
-    gap: 28px;
+    gap: 24px;
     margin-bottom: clamp(56px, 8vh, 96px);
-    max-width: 720px;
+    max-width: 760px;
   }
-  .section-head .lead { margin-top: 8px; }
+  .section-head .lead { margin-top: 4px; }
 
-  /* ===================== Trust strip ===================== */
-  .trust {
+  /* ===================== Problem ===================== */
+  .problem {
     border-top: 1px solid var(--rule);
-    border-bottom: 1px solid var(--rule);
-    padding: 40px 0;
-    background: color-mix(in srgb, var(--paper-deep) 60%, var(--paper) 40%);
+    background: color-mix(in srgb, var(--paper-deep) 50%, var(--paper) 50%);
   }
-  .trust-grid {
+  .problem-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 48px;
+    gap: clamp(32px, 4vw, 64px);
+    border-top: 1px solid var(--rule);
+    padding-top: clamp(40px, 6vh, 64px);
   }
-  .trust-item {
+  .stat {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 12px;
   }
-  .trust-item .label {
+  .stat .num {
+    font-family: var(--serif);
+    font-weight: 300;
+    font-size: clamp(38px, 4.2vw, 56px);
+    line-height: 1.05;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+  }
+  .stat .num strong { font-weight: 600; }
+  .stat .label {
     font-family: var(--serif);
     font-weight: 500;
     font-size: 16px;
     color: var(--ink);
-    letter-spacing: -0.01em;
   }
-  .trust-item .desc {
-    font-size: 13px;
+  .stat .desc {
+    font-size: 13.5px;
     color: var(--ink-soft);
-    line-height: 1.65;
+    line-height: 1.7;
     max-width: 32ch;
   }
-  .trust-item .num {
+  .stat .source {
     font-family: var(--mono);
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.18em;
+    font-size: 10.5px;
+    letter-spacing: 0.12em;
     color: var(--ink-faint);
-    margin-bottom: 6px;
+    text-transform: uppercase;
+    margin-top: 4px;
   }
 
-  /* ===================== Approach — 三 stage ===================== */
-  .approach-grid {
+  /* ===================== Feature grid ===================== */
+  .features-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: clamp(40px, 5vw, 80px);
-    border-top: 1px solid var(--rule);
-    padding-top: clamp(48px, 6vh, 80px);
+    gap: 1px;
+    background: var(--rule-strong);
+    border: 1px solid var(--rule-strong);
   }
-  .approach-item {
+  .feature {
+    background: var(--paper);
+    padding: clamp(28px, 3.5vw, 44px);
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 16px;
+    min-height: 240px;
+    position: relative;
   }
-  .approach-item .num-han {
-    font-family: var(--serif);
-    font-weight: 300;
-    font-size: clamp(64px, 7vw, 96px);
+  .feature .icon {
+    font-size: 28px;
     line-height: 1;
-    color: var(--ink);
-    margin-bottom: 8px;
+    margin-bottom: 4px;
   }
-  .approach-item h3 {
-    font-size: 22px;
+  .feature h3 {
+    font-size: 19px;
     font-weight: 500;
-    display: flex;
+    display: inline-flex;
     align-items: baseline;
-    gap: 12px;
+    flex-wrap: wrap;
+    gap: 10px;
   }
-  .approach-item h3 .han {
-    font-weight: 300;
-    color: var(--accent);
-    font-size: 18px;
+  .feature .badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    padding: 3px 8px;
+    background: var(--ink);
+    color: var(--paper);
   }
-  .approach-item p {
-    font-size: 14.5px;
-    line-height: 1.85;
+  .feature p {
+    font-size: 14px;
+    line-height: 1.75;
     color: var(--ink-soft);
-    max-width: 32ch;
+  }
+  .feature .tools {
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px dashed var(--rule);
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-faint);
+    letter-spacing: 0.06em;
   }
 
-  /* ===================== Isolation ===================== */
-  .isolation {
+  /* ===================== MCP highlight ===================== */
+  .mcp {
     background: var(--paper-deep);
     border-top: 1px solid var(--rule);
     border-bottom: 1px solid var(--rule);
-    position: relative;
     overflow: hidden;
+    position: relative;
   }
-  /* faint dragon tail echo */
-  .isolation::before {
+  .mcp::before {
     content: "";
     position: absolute;
-    right: -8%;
-    bottom: -12%;
-    width: 60%;
-    max-width: 720px;
+    left: -8%;
+    top: -8%;
+    width: 45%;
+    max-width: 540px;
     aspect-ratio: 1 / 1;
     background-image: url("assets/papurion-dragon.png");
     background-size: contain;
     background-repeat: no-repeat;
-    background-position: bottom right;
-    opacity: 0.08;
-    -webkit-mask-image: radial-gradient(ellipse at 70% 70%, #000 30%, transparent 75%);
-            mask-image: radial-gradient(ellipse at 70% 70%, #000 30%, transparent 75%);
-    transform: scaleX(-1);
+    background-position: top left;
+    opacity: 0.06;
+    -webkit-mask-image: radial-gradient(ellipse at 30% 30%, #000 35%, transparent 75%);
+            mask-image: radial-gradient(ellipse at 30% 30%, #000 35%, transparent 75%);
     pointer-events: none;
   }
-  .isolation > .wrap { position: relative; z-index: 1; }
-
-  .promises {
-    display: flex;
-    flex-direction: column;
-  }
-  .promise {
+  .mcp > .wrap { position: relative; z-index: 1; }
+  .mcp-grid {
     display: grid;
-    grid-template-columns: 80px 1fr;
-    gap: 40px;
-    padding: 36px 0;
-    border-top: 1px solid var(--rule);
-    align-items: baseline;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    gap: clamp(40px, 5vw, 72px);
+    align-items: start;
   }
-  .promise:last-child {
-    border-bottom: 1px solid var(--rule);
-  }
-  .promise .han-num {
-    font-family: var(--serif);
-    font-weight: 300;
-    font-size: 28px;
-    color: var(--accent);
-    line-height: 1;
-  }
-  .promise .body { display: flex; flex-direction: column; gap: 10px; max-width: 64ch; }
-  .promise h3 {
-    font-size: 19px;
-    font-weight: 500;
-    line-height: 1.4;
-  }
-  .promise p {
-    font-size: 14.5px;
-    line-height: 1.8;
-    color: var(--ink-soft);
-  }
-
-  /* ===================== Final CTA ===================== */
-  .cta-final {
-    padding: clamp(120px, 18vh, 200px) 0;
-    text-align: left;
-  }
-  .cta-final .section-head {
-    margin-bottom: 48px;
-  }
-  .cta-final .quote-block {
-    font-family: var(--serif);
-    font-weight: 300;
-    font-size: clamp(15px, 1.2vw, 17px);
-    line-height: 1.85;
-    color: var(--ink-soft);
-    max-width: 52ch;
-    margin-bottom: 56px;
-  }
-  .cta-mail {
-    display: inline-flex;
-    align-items: baseline;
-    gap: 14px;
-    padding: 18px 32px;
+  .mcp-copy { display: flex; flex-direction: column; gap: 20px; }
+  .mcp-copy h2 .new {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    padding: 4px 10px;
     background: var(--ink);
     color: var(--paper);
-    font-family: var(--mono);
-    font-size: 15px;
-    letter-spacing: 0.02em;
-    transition: background 200ms ease;
+    vertical-align: middle;
+    margin-left: 12px;
+    font-weight: 500;
   }
-  .cta-mail:hover { background: #000; }
-  .cta-mail::after { content: "↗"; font-family: var(--sans); }
+  .mcp-copy p {
+    font-size: 15px;
+    line-height: 1.85;
+    color: var(--ink-soft);
+    max-width: 50ch;
+  }
+  .mcp-scanners {
+    list-style: none;
+    padding: 0;
+    margin: 8px 0 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px 24px;
+  }
+  .mcp-scanners li {
+    font-size: 13.5px;
+    color: var(--ink);
+    padding-left: 18px;
+    position: relative;
+    line-height: 1.55;
+  }
+  .mcp-scanners li::before {
+    content: "▪";
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: var(--accent);
+  }
+  .mcp-scanners code {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+  .mcp-ides {
+    margin-top: 24px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink-faint);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .mcp-ides strong {
+    color: var(--ink-soft);
+    font-weight: 500;
+    margin-right: 8px;
+  }
+  .mcp-cta { margin-top: 24px; display: flex; gap: 14px; flex-wrap: wrap; }
+
+  /* Terminal mockup */
+  .terminal {
+    background: var(--terminal);
+    color: var(--terminal-ink);
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.7;
+    padding: 0;
+    box-shadow: 0 12px 40px rgba(28, 25, 23, 0.18), 0 2px 8px rgba(28, 25, 23, 0.12);
+    border: 1px solid rgba(0,0,0,0.4);
+    overflow: hidden;
+  }
+  .terminal-bar {
+    background: #2a2624;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .terminal-bar .dot {
+    width: 11px; height: 11px; border-radius: 50%;
+    background: #5a5450;
+  }
+  .terminal-bar .dot.r { background: #d96156; }
+  .terminal-bar .dot.y { background: #d9b056; }
+  .terminal-bar .dot.g { background: #6fb86b; }
+  .terminal-bar .title {
+    margin-left: auto;
+    font-size: 11px;
+    color: #8a8480;
+    letter-spacing: 0.06em;
+  }
+  .terminal-body {
+    padding: 20px 22px;
+    white-space: pre;
+    overflow-x: auto;
+    max-height: 480px;
+  }
+  .terminal-body .cmd { color: #d4cfb8; }
+  .terminal-body .prompt { color: #6fb86b; }
+  .terminal-body .dim { color: #8a8480; }
+  .terminal-body .crit { color: #ef6b5e; font-weight: 500; }
+  .terminal-body .warn { color: #e0a85a; font-weight: 500; }
+  .terminal-body .ok { color: #6fb86b; }
+  .terminal-body .acc { color: #79b4d4; }
+
+  /* ===================== Workflow ===================== */
+  .workflow-steps {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    counter-reset: step;
+  }
+  .step {
+    padding: 36px 24px;
+    border-right: 1px solid var(--rule);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    position: relative;
+    counter-increment: step;
+  }
+  .step:last-child { border-right: none; }
+  .step .num {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: var(--ink-faint);
+  }
+  .step .num::before {
+    content: counter(step, decimal-leading-zero);
+  }
+  .step h4 {
+    font-family: var(--serif);
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--ink);
+  }
+  .step p {
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: var(--ink-soft);
+  }
+  .step .arrow {
+    position: absolute;
+    right: -7px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 14px;
+    height: 14px;
+    background: var(--paper);
+    border-top: 1px solid var(--rule);
+    border-right: 1px solid var(--rule);
+    transform-origin: center;
+    transform: translateY(-50%) rotate(45deg);
+    z-index: 2;
+  }
+  .step:last-child .arrow { display: none; }
+
+  /* ===================== Pricing ===================== */
+  .pricing {
+    background: color-mix(in srgb, var(--paper-deep) 40%, var(--paper) 60%);
+    border-top: 1px solid var(--rule);
+  }
+  .plans {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--rule-strong);
+    border: 1px solid var(--rule-strong);
+  }
+  .plan {
+    background: var(--paper);
+    padding: clamp(28px, 3.2vw, 40px);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    position: relative;
+  }
+  .plan.featured {
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .plan.featured h3,
+  .plan.featured .price,
+  .plan.featured .price strong,
+  .plan.featured ul li { color: var(--paper); }
+  .plan.featured .desc { color: rgba(245, 241, 232, 0.7); }
+  .plan.featured .badge-best {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    padding: 4px 10px;
+    background: var(--paper);
+    color: var(--ink);
+  }
+  .plan h3 {
+    font-size: 22px;
+    font-weight: 500;
+  }
+  .plan .desc {
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.7;
+  }
+  .plan .price {
+    font-family: var(--serif);
+    font-weight: 300;
+    font-size: 32px;
+    line-height: 1;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+  .plan .price strong { font-weight: 600; }
+  .plan .price .per {
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--ink-faint);
+    margin-left: 4px;
+  }
+  .plan.featured .price .per { color: rgba(245, 241, 232, 0.6); }
+  .plan ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border-top: 1px solid var(--rule);
+    padding-top: 20px;
+  }
+  .plan.featured ul { border-top-color: rgba(245, 241, 232, 0.12); }
+  .plan ul li {
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--ink);
+    padding-left: 22px;
+    position: relative;
+  }
+  .plan ul li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .plan.featured ul li::before { color: #8ec5e0; }
+  .plan ul li.off {
+    color: var(--ink-faint);
+    text-decoration: line-through;
+  }
+  .plan ul li.off::before { content: "·"; color: var(--ink-faint); }
+  .plan .cta {
+    margin-top: auto;
+  }
+  .plan .cta .btn { width: 100%; }
+  .plan.featured .btn-filled {
+    background: var(--paper);
+    color: var(--ink);
+    border-color: var(--paper);
+  }
+  .plan.featured .btn-filled:hover { background: #fff; }
+
+  .pricing-note {
+    margin-top: 32px;
+    font-size: 13px;
+    color: var(--ink-soft);
+    text-align: center;
+  }
+
+  /* ===================== Integrations strip ===================== */
+  .integrations {
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    background: var(--paper);
+  }
+  .integrations .wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+    text-align: center;
+  }
+  .integrations h3 {
+    font-size: clamp(22px, 2.4vw, 30px);
+    font-weight: 400;
+  }
+  .integrations h3 strong { font-weight: 600; }
+  .integrations p {
+    font-size: 14px;
+    color: var(--ink-soft);
+  }
+  .logos {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 14px 28px;
+    padding-top: 16px;
+  }
+  .logos .chip {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    padding: 8px 16px;
+    border: 1px solid var(--rule-strong);
+    color: var(--ink-soft);
+    background: color-mix(in srgb, var(--paper-deep) 30%, var(--paper) 70%);
+    transition: border-color 200ms ease, color 200ms ease;
+  }
+  .logos .chip:hover { border-color: var(--ink); color: var(--ink); }
 
   /* ===================== Footer ===================== */
   footer.site {
@@ -490,8 +774,16 @@
   .footer-brand .tag {
     font-size: 13px;
     color: var(--ink-soft);
-    max-width: 28ch;
+    max-width: 32ch;
     line-height: 1.7;
+  }
+  .footer-brand .company {
+    margin-top: 18px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
   }
   .footer-col h4 {
     font-family: var(--mono);
@@ -529,7 +821,25 @@
     text-transform: uppercase;
   }
 
+  /* ===================== Reveal animation ===================== */
+  .reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 700ms ease, transform 700ms ease;
+  }
+  .reveal.in { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal, html { transition: none; scroll-behavior: auto; }
+    .reveal { opacity: 1; transform: none; }
+  }
+
   /* ===================== Responsive ===================== */
+  @media (max-width: 1060px) {
+    .features-grid { grid-template-columns: repeat(2, 1fr); }
+    .workflow-steps { grid-template-columns: repeat(3, 1fr); }
+    .step:nth-child(3) { border-right: none; }
+    .step:nth-child(3) .arrow { display: none; }
+  }
   @media (max-width: 960px) {
     nav.primary a:not(.btn) { display: none; }
     .hero-inner { grid-template-columns: 1fr; gap: 24px; min-height: 0; }
@@ -538,20 +848,26 @@
       max-width: 420px;
       margin: 0 auto;
       justify-self: center;
-      aspect-ratio: 1 / 1;
     }
     .dragon-stage img { opacity: 0.6; }
-    .trust-grid { grid-template-columns: 1fr; gap: 32px; }
-    .approach-grid { grid-template-columns: 1fr; gap: 56px; }
-    .promise { grid-template-columns: 60px 1fr; gap: 20px; padding: 28px 0; }
+    .problem-grid { grid-template-columns: 1fr; gap: 32px; }
+    .mcp-grid { grid-template-columns: 1fr; gap: 40px; }
+    .mcp-scanners { grid-template-columns: 1fr; }
+    .plans { grid-template-columns: 1fr; }
     .footer-top { grid-template-columns: 1fr 1fr; gap: 40px; }
     .footer-brand { grid-column: 1 / -1; }
   }
-  @media (max-width: 600px) {
-    .hero { padding-top: 24px; }
-    .hero .ctas { flex-direction: column; align-items: flex-start; gap: 12px; }
+  @media (max-width: 640px) {
+    .features-grid { grid-template-columns: 1fr; }
+    .workflow-steps { grid-template-columns: 1fr; }
+    .step { border-right: none; border-bottom: 1px solid var(--rule); }
+    .step:last-child { border-bottom: none; }
+    .step .arrow { display: none; }
+    .hero .ctas { flex-direction: column; align-items: stretch; gap: 12px; }
+    .hero .ctas .btn { width: 100%; }
     .footer-top { grid-template-columns: 1fr; }
     .footer-bottom { flex-direction: column; gap: 8px; align-items: flex-start; }
+    .terminal-body { font-size: 11.5px; padding: 16px; }
   }
 </style>
 </head>
@@ -561,9 +877,11 @@
   <div class="wrap header-inner">
     <a href="#" class="wordmark" aria-label="Papurion 홈">Papurion</a>
     <nav class="primary" aria-label="주 메뉴">
-      <a href="#approach">접근 방식</a>
-      <a href="#isolation">격리 약속</a>
-      <a href="#contact" class="btn btn-outline">상담 신청</a>
+      <a href="#features">기능</a>
+      <a href="#mcp">MCP 보안</a>
+      <a href="#workflow">워크플로우</a>
+      <a href="#pricing">요금제</a>
+      <a href="https://app.papurion.com" class="btn btn-outline">대시보드</a>
     </nav>
   </div>
 </header>
@@ -571,24 +889,25 @@
 <main>
 
   <!-- ========================= HERO ========================= -->
-  <section class="hero" data-screen-label="01 Hero">
+  <section class="hero" aria-label="Hero">
     <div class="wrap hero-inner">
 
       <div class="hero-text">
-        <span class="eyebrow">AI Security</span>
+        <span class="eyebrow">AI Agent Security Platform</span>
         <h1 class="display">
-          <strong>연 1회 점검으로는,<br />이제 부족합니다.</strong>
-          <span class="line2">흐르는 코드 속에서,<br />멈춰야 할 지점을 찾습니다.</span>
+          <strong>AI Agent 시대의<br />보안 플랫폼.</strong>
+          <span class="line2">코드부터 MCP 서버까지,<br />AI가 만들고 AI가 쓰는 모든 것을 보호합니다.</span>
         </h1>
         <p class="sub">
-          Papurion은 AI를 활용한 취약점 점검 서비스입니다.
-          검증된 오픈소스 스캐너와 AI 분석을 결합하여
-          코드와 인프라의 약점을 발견하고 정리해 드립니다.
+          Papurion은 SAST · SCA · DAST · 시크릿 스캔에
+          MCP Agent 보안 점검과 AI 분석을 결합한 통합 보안 플랫폼입니다.
+          코드 한 줄, 도구 한 개도 빠뜨리지 않습니다.
         </p>
         <div class="ctas">
-          <a href="#contact" class="btn btn-filled">상담 신청</a>
-          <a href="#approach" class="btn btn-text">접근 방식 보기</a>
+          <a href="https://app.papurion.com" class="btn btn-filled">대시보드 시작 →</a>
+          <a href="#mcp" class="btn btn-ghost">$ npx papurion-mcp-scan</a>
         </div>
+        <p class="micro">NO CREDIT CARD · 5분 안에 첫 스캔</p>
       </div>
 
       <div class="dragon-stage" aria-hidden="true">
@@ -598,141 +917,354 @@
     </div>
   </section>
 
-  <!-- ========================= TRUST STRIP ========================= -->
-  <section class="trust" aria-label="신뢰 원칙" data-screen-label="02 Trust">
-    <div class="wrap trust-grid">
-      <div class="trust-item">
-        <div class="num">壹 / 01</div>
-        <div class="label">학습 미사용</div>
-        <p class="desc">고객 데이터는 AI 모델 학습에 사용되지 않습니다.</p>
-      </div>
-      <div class="trust-item">
-        <div class="num">貳 / 02</div>
-        <div class="label">전송 전 마스킹</div>
-        <p class="desc">민감 정보는 AI 전송 전 2단계 마스킹됩니다.</p>
-      </div>
-      <div class="trust-item">
-        <div class="num">參 / 03</div>
-        <div class="label">완전 격리</div>
-        <p class="desc">고객사별 독립 환경, 분석 후 즉시 폐기됩니다.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- ========================= APPROACH ========================= -->
-  <section id="approach" data-screen-label="03 Approach">
+  <!-- ========================= PROBLEM ========================= -->
+  <section id="problem" class="problem" aria-label="문제 제기">
     <div class="wrap">
-      <div class="section-head">
-        <span class="eyebrow">Approach</span>
+      <div class="section-head reveal">
+        <span class="eyebrow">The Problem</span>
         <h2 class="section-h">
-          발견은 빠르게,<br /><strong>판단은 사람이.</strong>
+          2026년, AI가 코드를 쓰고<br />MCP로 도구를 연결합니다.<br />
+          <strong>보안은 따라가고 있나요?</strong>
         </h2>
         <p class="lead">
-          취약점 발견에서 익스플로잇까지 걸리는 시간이
-          이제 수개월이 아니라 수시간입니다.
-          Papurion은 이 속도 변화를 인정하고 설계된
-          AI 보조 보안 점검 서비스입니다.
+          기존 도구의 시야는 좁습니다.
+          Snyk은 의존성, CodeQL은 패턴 매칭에 머무릅니다.
+          AI Agent가 만든 코드와 MCP로 연결된 도구의 보안은
+          아무도 책임지고 있지 않습니다.
         </p>
       </div>
 
-      <div class="approach-grid">
-        <div class="approach-item">
-          <div class="num-han">一</div>
-          <h3>정찰 <span class="han">探</span></h3>
-          <p>
-            어택 서피스를 매핑합니다. 진입점, 외부 의존성, 노출된 자산을
-            식별하고 비즈니스 맥락에서 우선순위를 정합니다.
+      <div class="problem-grid">
+        <div class="stat reveal">
+          <div class="num"><strong>8,000+</strong></div>
+          <div class="label">노출된 MCP 서버</div>
+          <p class="desc">
+            인증 없이 인터넷에 노출된 MCP 엔드포인트.
+            그 중 다수가 파일시스템 · 셸 · 시크릿에 접근 가능합니다.
           </p>
+          <p class="source">Source · Knostic 2026 Report</p>
         </div>
-        <div class="approach-item">
-          <div class="num-han">二</div>
-          <h3>탐지 <span class="han">察</span></h3>
-          <p>
-            검증된 오픈소스 스캐너와 AI 분석이 협력하여 취약점,
-            시크릿 노출, 의존성 위험을 발견합니다.
+
+        <div class="stat reveal">
+          <div class="num"><strong>200,000</strong></div>
+          <div class="label">취약한 MCP 서버</div>
+          <p class="desc">
+            프롬프트 인젝션, 시크릿 노출, 과도한 권한 —
+            이미 배포된 MCP 서버 대부분이 최소 1개 이상의 결함을 가집니다.
           </p>
+          <p class="source">Source · Backslash Security 2026</p>
         </div>
-        <div class="approach-item">
-          <div class="num-han">三</div>
-          <h3>판단 <span class="han">斷</span></h3>
-          <p>
-            AI 분류와 사람의 검토를 결합하여 false positive를 걸러내고,
-            실제 비즈니스 임팩트 기준으로 P0–P3 우선순위를 산정합니다.
+
+        <div class="stat reveal">
+          <div class="num">기존 도구는<br /><strong>여기까지.</strong></div>
+          <div class="label">코드 너머는 사각지대</div>
+          <p class="desc">
+            의존성 스캐너, SAST, DAST는 각자의 영역에 머무릅니다.
+            AI Agent · MCP · Autofix까지 한 플랫폼에서 다루는 곳은 드뭅니다.
           </p>
+          <p class="source">Papurion fills the gap</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ========================= ISOLATION ========================= -->
-  <section id="isolation" class="isolation" data-screen-label="04 Isolation">
+  <!-- ========================= FEATURES ========================= -->
+  <section id="features" aria-label="핵심 기능">
     <div class="wrap">
-      <div class="section-head">
-        <span class="eyebrow">Isolation by Design</span>
+      <div class="section-head reveal">
+        <span class="eyebrow">Features</span>
         <h2 class="section-h">
-          격리는 기능이 아닙니다.<br /><strong>존재 이유입니다.</strong>
+          여섯 개의 시선으로<br /><strong>한 번에 점검합니다.</strong>
         </h2>
         <p class="lead">
-          보안 점검 서비스가 고객 데이터를 흘리면
-          그 서비스는 성립할 수 없습니다.
-          Papurion의 모든 결정은 격리 우선 원칙에서 출발합니다.
+          업계 표준 오픈소스 엔진을 정직하게 묶고,
+          그 결과를 AI가 검토합니다.
+          오탐은 줄이고, 진짜 위협만 남깁니다.
         </p>
       </div>
 
-      <div class="promises">
-        <div class="promise">
-          <div class="han-num">壹</div>
-          <div class="body">
-            <h3>고객 데이터는 AI 학습에 사용되지 않습니다.</h3>
-            <p>AI 제공사의 상업 약관에 따라 모델 학습에 사용되지 않으며, 단기 보관 후 자동 삭제됩니다.</p>
-          </div>
+      <div class="features-grid">
+        <div class="feature reveal">
+          <div class="icon">🛡️</div>
+          <h3>SAST + SCA + Secret</h3>
+          <p>정적 분석으로 코드 결함, 의존성 취약점, 노출된 시크릿을 한 번에 검사합니다. 코드 레벨 전수 검사.</p>
+          <div class="tools">Semgrep · OSV-Scanner · Trivy · TruffleHog · npm-audit</div>
         </div>
-        <div class="promise">
-          <div class="han-num">貳</div>
-          <div class="body">
-            <h3>민감 정보는 AI에 전송되기 전 마스킹됩니다.</h3>
-            <p>주민번호, 시크릿, 자격증명은 정규식과 AI 2단계 마스킹을 거쳐 전송됩니다.</p>
-          </div>
+
+        <div class="feature reveal">
+          <div class="icon">🌐</div>
+          <h3>DAST</h3>
+          <p>운영 중인 웹 엔드포인트에 실제 페이로드를 던져 노출된 취약점을 동적으로 확인합니다.</p>
+          <div class="tools">Nuclei · web_url 자산 지원</div>
         </div>
-        <div class="promise">
-          <div class="han-num">參</div>
-          <div class="body">
-            <h3>고객 코드는 분석 후 즉시 폐기됩니다.</h3>
-            <p>격리된 컨테이너 내에서만 분석되며, 작업 완료 후 안전 삭제됩니다.</p>
-          </div>
+
+        <div class="feature reveal">
+          <div class="icon">🤖</div>
+          <h3>MCP Agent 보안 <span class="badge">NEW</span></h3>
+          <p>개발자 머신과 CI의 MCP 서버 설정을 스캔합니다. AI 도구 보안의 첫 번째 방어선.</p>
+          <div class="tools">npx papurion-mcp-scan · 6 scanners</div>
         </div>
-        <div class="promise">
-          <div class="han-num">肆</div>
-          <div class="body">
-            <h3>고객사별 완전 격리 환경에서 분석됩니다.</h3>
-            <p>데이터베이스, API 키, 컨테이너, 네트워크가 고객별 독립 운영됩니다.</p>
-          </div>
+
+        <div class="feature reveal">
+          <div class="icon">🧠</div>
+          <h3>AI Triage</h3>
+          <p>Claude · Gemini 다중 AI가 finding을 교차 검토합니다. 도달 가능성 분석과 PoC 자동 생성으로 오탐을 걸러냅니다.</p>
+          <div class="tools">Reachability · PoC 생성 · 우선순위 P0–P3</div>
         </div>
-        <div class="promise">
-          <div class="han-num">伍</div>
-          <div class="body">
-            <h3>모든 처리는 개인정보처리위탁계약으로 보장됩니다.</h3>
-            <p>한국 개인정보보호법 및 국외이전 동의를 명시한 계약을 체결합니다.</p>
-          </div>
+
+        <div class="feature reveal">
+          <div class="icon">📊</div>
+          <h3>Delta 추적</h3>
+          <p>fingerprint 기반으로 재점검마다 New · Persistent · Resolved · Reopened를 자동 분류합니다.</p>
+          <div class="tools">변화 비교 · 트렌드 · 자동 재점검</div>
+        </div>
+
+        <div class="feature reveal">
+          <div class="icon">📋</div>
+          <h3>컴플라이언스</h3>
+          <p>각 finding을 OWASP Top 10, CWE, ISO 27001 컨트롤에 자동 매핑하고 PDF 리포트로 내보냅니다.</p>
+          <div class="tools">OWASP · CWE · ISO 27001 · PDF</div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ========================= FINAL CTA ========================= -->
-  <section id="contact" class="cta-final" data-screen-label="05 Contact">
+  <!-- ========================= MCP HIGHLIGHT ========================= -->
+  <section id="mcp" class="mcp" aria-label="MCP Agent 보안">
     <div class="wrap">
-      <div class="section-head">
-        <span class="eyebrow">Get Started</span>
+      <div class="section-head reveal" style="max-width: 900px;">
+        <span class="eyebrow">MCP Agent Security · Open Source</span>
         <h2 class="section-h">
-          당신의 코드는,<br /><strong>이미 검토 가치가 있습니다.</strong>
+          AI 도구가<br />당신의 머신을 공격합니다.<span class="new">NEW</span>
         </h2>
+        <p class="lead">
+          Claude Code · Cursor · VS Code · Windsurf — 모두 MCP 서버를 통해 외부 도구를 호출합니다.
+          그 설정 한 줄에 시크릿이 박혀 있고, 권한이 열려 있고, 프롬프트 인젝션 페이로드가 숨어 있어도
+          기존 보안 도구는 보지 못합니다.
+        </p>
       </div>
-      <p class="quote-block">
-        첫 점검은 NDA·DPA 체결 후 진행됩니다.<br />
-        30분 무료 상담으로 적합한 점검 범위를 함께 정의합니다.
-      </p>
-      <a href="mailto:contact@papurion.com" class="cta-mail">contact@papurion.com</a>
+
+      <div class="mcp-grid">
+        <div class="mcp-copy reveal">
+          <h3 style="font-size: 22px; font-weight: 500;">한 줄로 머신 전체 점검</h3>
+          <p>
+            <code style="font-family: var(--mono); background: var(--accent-soft); padding: 2px 8px; color: var(--accent);">npx papurion-mcp-scan</code>
+            한 줄이면 IDE의 MCP 설정을 자동으로 찾아 6가지 보안 검사를 수행합니다.
+            네트워크 호출 없이 정적 분석이 기본이고, 시크릿 값은 절대 출력되지 않습니다.
+          </p>
+
+          <ul class="mcp-scanners">
+            <li><strong>프롬프트 인젝션</strong> — 도구 설명·env에 숨은 인젝션 / 제로폭 문자 / base64 우회</li>
+            <li><strong>시크릿 노출</strong> — 하드코딩된 API 키, 토큰, DB 연결 문자열</li>
+            <li><strong>권한 감사</strong> — 루트/홈 디렉토리, Docker 소켓, sudo, rm -rf</li>
+            <li><strong>Tool Poisoning</strong> — @modelcontextprotocol/* typosquat 탐지</li>
+            <li><strong>전송 보안</strong> — HTTP 미암호화, 0.0.0.0 바인딩, 인증 누락</li>
+            <li><strong>Shadow MCP</strong> — 조직 allowlist에 없는 비인가 서버</li>
+          </ul>
+
+          <p class="mcp-ides"><strong>지원 IDE</strong> Claude Code · Claude Desktop · Cursor · VS Code · Windsurf</p>
+
+          <div class="mcp-cta">
+            <a href="https://github.com/hack3rsolution/papurion-mcp-scan" class="btn btn-outline">GitHub →</a>
+            <a href="https://www.npmjs.com/package/papurion-mcp-scan" class="btn btn-text">npm 패키지 보기</a>
+          </div>
+        </div>
+
+        <div class="terminal reveal" aria-label="papurion-mcp-scan 실행 예시">
+          <div class="terminal-bar">
+            <span class="dot r"></span>
+            <span class="dot y"></span>
+            <span class="dot g"></span>
+            <span class="title">~/projects · papurion-mcp-scan</span>
+          </div>
+<div class="terminal-body"><span class="prompt">$</span> <span class="cmd">npx papurion-mcp-scan</span>
+
+<span class="acc">🐉 Papurion MCP Security Scanner v0.1.0</span>
+
+<span class="dim">📍 Scanning MCP configurations...</span>
+   <span class="ok">✓</span> [Claude Code] ~/.claude.json <span class="dim">(3 servers)</span>
+   <span class="ok">✓</span> [Cursor]      ~/.cursor/mcp.json <span class="dim">(2 servers)</span>
+
+<span class="dim">═══════════════════════════════════════════════════════</span>
+ 5 MCP servers found · <span class="warn">4 issues detected</span>
+<span class="dim">═══════════════════════════════════════════════════════</span>
+
+<span class="crit">🔴 CRITICAL</span> — filesystem-root <span class="dim">(Claude Code)</span>
+   <span class="crit">🔴</span> Filesystem root (/) granted
+      <span class="dim">@ args[2]</span>
+      → Restrict to a specific working directory.
+
+<span class="crit">🔴 CRITICAL</span> — github-typo <span class="dim">(Cursor)</span>
+   <span class="crit">🔴</span> GitHub personal access token hardcoded
+      <span class="dim">@ env.GITHUB_TOKEN · evidence: ghp_****23</span>
+      → Move secret to env or secret manager.
+   <span class="warn">🟠</span> Possible typosquat of @modelcontextprotocol/server-github
+      <span class="dim">evidence: @modelcontextprotocoll/...</span>
+
+<span class="warn">🟠 HIGH</span> — remote-http <span class="dim">(Cursor)</span>
+   <span class="warn">🟠</span> HTTP (unencrypted) MCP endpoint
+      → Switch the server to HTTPS.
+
+<span class="dim">───────────────────────────────────────────────────────</span>
+ Summary: <span class="crit">2 critical</span> · <span class="warn">1 high</span> · 1 medium · 0 low
+<span class="dim">═══════════════════════════════════════════════════════</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================= WORKFLOW ========================= -->
+  <section id="workflow" aria-label="워크플로우">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">How it works</span>
+        <h2 class="section-h">
+          자산 등록부터 리포트까지,<br /><strong>한 사이클로 흐릅니다.</strong>
+        </h2>
+        <p class="lead">
+          각 단계는 자동화되어 있고, 사람이 개입할 지점은 명확히 분리되어 있습니다.
+          CI/CD에 연동하면 매 PR마다 같은 사이클이 돌아갑니다.
+        </p>
+      </div>
+
+      <div class="workflow-steps reveal">
+        <div class="step">
+          <span class="num"></span>
+          <h4>자산 등록</h4>
+          <p>GitHub repo 또는 web URL을 대시보드에 등록합니다.</p>
+          <span class="arrow" aria-hidden="true"></span>
+        </div>
+        <div class="step">
+          <span class="num"></span>
+          <h4>스캔 실행</h4>
+          <p>격리된 Fly Machine 컨테이너에서 SAST·SCA·DAST·Secret이 병렬 실행됩니다.</p>
+          <span class="arrow" aria-hidden="true"></span>
+        </div>
+        <div class="step">
+          <span class="num"></span>
+          <h4>AI 분석</h4>
+          <p>다중 AI가 finding을 검토하고 도달 가능성과 PoC를 생성합니다.</p>
+          <span class="arrow" aria-hidden="true"></span>
+        </div>
+        <div class="step">
+          <span class="num"></span>
+          <h4>Delta 추적</h4>
+          <p>fingerprint로 New · Persistent · Resolved · Reopened를 자동 분류합니다.</p>
+          <span class="arrow" aria-hidden="true"></span>
+        </div>
+        <div class="step">
+          <span class="num"></span>
+          <h4>알림 · 자동 수정</h4>
+          <p>Slack으로 즉시 알리고, Pro 이상은 AI 수정 PR이 자동 생성됩니다.</p>
+          <span class="arrow" aria-hidden="true"></span>
+        </div>
+        <div class="step">
+          <span class="num"></span>
+          <h4>리포트</h4>
+          <p>OWASP·CWE·ISO 27001 매핑이 포함된 PDF 컴플라이언스 리포트로 마무리.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================= PRICING ========================= -->
+  <section id="pricing" class="pricing" aria-label="요금제">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">Pricing</span>
+        <h2 class="section-h">
+          팀의 규모에 맞춰<br /><strong>세 가지 선택지.</strong>
+        </h2>
+        <p class="lead">
+          모든 요금제에 SAST · SCA · 시크릿 스캔과 Delta 추적이 기본 포함됩니다.
+          MCP 스캐너 CLI는 누구나 무료로 사용할 수 있습니다.
+        </p>
+      </div>
+
+      <div class="plans">
+
+        <div class="plan reveal">
+          <h3>Starter</h3>
+          <p class="desc">소규모 팀 · 단일 프로덕트.</p>
+          <div class="price"><strong>₩49,000</strong><span class="per">/월</span></div>
+          <ul>
+            <li>월 50회 스캔</li>
+            <li>자산 5개</li>
+            <li>SAST · SCA · Secret</li>
+            <li>DAST (Nuclei) 동적 스캔</li>
+            <li>Slack 알림</li>
+            <li>Delta 추적</li>
+            <li class="off">AI 자동 수정 PR</li>
+            <li class="off">컴플라이언스 PDF</li>
+          </ul>
+          <div class="cta">
+            <a href="https://app.papurion.com" class="btn btn-outline">시작하기</a>
+          </div>
+        </div>
+
+        <div class="plan featured reveal">
+          <span class="badge-best">RECOMMENDED</span>
+          <h3>Pro</h3>
+          <p class="desc">성장 중인 스타트업 · 다수의 서비스 운영.</p>
+          <div class="price"><strong>₩199,000</strong><span class="per">/월</span></div>
+          <ul>
+            <li>월 500회 스캔</li>
+            <li>자산 50개</li>
+            <li>Starter의 모든 기능</li>
+            <li>AI 자동 수정 PR 생성</li>
+            <li>컴플라이언스 PDF 다운로드</li>
+            <li>GitHub Actions 연동</li>
+            <li>스케줄링 자동 재점검</li>
+            <li>API Key 다중 발급</li>
+          </ul>
+          <div class="cta">
+            <a href="https://app.papurion.com" class="btn btn-filled">Pro 시작 →</a>
+          </div>
+        </div>
+
+        <div class="plan reveal">
+          <h3>Enterprise</h3>
+          <p class="desc">대규모 조직 · 규제 산업 · 전담 SLA.</p>
+          <div class="price"><strong>₩990,000</strong><span class="per">/월~</span></div>
+          <ul>
+            <li>무제한 스캔</li>
+            <li>무제한 자산</li>
+            <li>Pro의 모든 기능</li>
+            <li>Excel 내보내기</li>
+            <li>SSO · 감사 로그</li>
+            <li>전담 온보딩 · 우선 지원</li>
+            <li>커스텀 MCP allowlist 운영</li>
+            <li>NDA · DPA 체결 지원</li>
+          </ul>
+          <div class="cta">
+            <a href="mailto:sales@papurion.com" class="btn btn-outline">문의하기</a>
+          </div>
+        </div>
+
+      </div>
+
+      <p class="pricing-note">결제는 PortOne / Polar.sh를 통해 안전하게 처리됩니다. · 연간 결제 할인은 영업팀에 문의하세요.</p>
+    </div>
+  </section>
+
+  <!-- ========================= INTEGRATIONS ========================= -->
+  <section class="integrations" aria-label="연동 및 기술 스택">
+    <div class="wrap">
+      <span class="eyebrow">Integrations & Stack</span>
+      <h3>CI/CD 파이프라인에 <strong>5분 안에 연동.</strong></h3>
+      <p>업계 표준 오픈소스 엔진을 정직하게 묶고, 익숙한 도구로 결과를 전달합니다.</p>
+      <div class="logos">
+        <span class="chip">GitHub Actions</span>
+        <span class="chip">Slack</span>
+        <span class="chip">Semgrep</span>
+        <span class="chip">Trivy</span>
+        <span class="chip">Nuclei</span>
+        <span class="chip">OSV-Scanner</span>
+        <span class="chip">TruffleHog</span>
+        <span class="chip">Claude AI</span>
+        <span class="chip">Gemini</span>
+        <span class="chip">Supabase</span>
+      </div>
     </div>
   </section>
 
@@ -743,39 +1275,62 @@
     <div class="footer-top">
       <div class="footer-brand">
         <div class="mark">Papurion</div>
-        <p class="tag">AI 기반 취약점 점검 서비스</p>
+        <p class="tag">AI Agent 시대의 보안 플랫폼. 코드부터 MCP 서버까지 한 곳에서 점검합니다.</p>
+        <div class="company">Pie Nest Inc.</div>
       </div>
       <div class="footer-col">
-        <h4>Service</h4>
+        <h4>Product</h4>
         <ul>
-          <li><a href="#approach">접근 방식</a></li>
-          <li><a href="#isolation">격리 약속</a></li>
-          <li><a href="#contact">상담 신청</a></li>
+          <li><a href="#features">기능</a></li>
+          <li><a href="#mcp">MCP 보안</a></li>
+          <li><a href="#workflow">워크플로우</a></li>
+          <li><a href="#pricing">요금제</a></li>
+          <li><a href="https://app.papurion.com">대시보드</a></li>
         </ul>
       </div>
       <div class="footer-col">
-        <h4>Contact</h4>
+        <h4>Open Source</h4>
+        <ul>
+          <li><a href="https://github.com/hack3rsolution/papurion-mcp-scan">papurion-mcp-scan</a></li>
+          <li><a href="https://www.npmjs.com/package/papurion-mcp-scan">npm 패키지</a></li>
+          <li><a href="/.well-known/security.txt">security.txt</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Contact & Legal</h4>
         <ul>
           <li><a href="mailto:contact@papurion.com">contact@papurion.com</a></li>
           <li><a href="mailto:security@papurion.com">security@papurion.com</a></li>
-          <li><a href="mailto:privacy@papurion.com">privacy@papurion.com</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h4>Legal</h4>
-        <ul>
-          <li><a href="#">개인정보처리방침</a></li>
           <li><a href="#">이용약관</a></li>
-          <li><a href="/.well-known/security.txt">security.txt</a></li>
+          <li><a href="#">개인정보처리방침</a></li>
         </ul>
       </div>
     </div>
     <div class="footer-bottom">
-      <span>© 2026 Papurion. All rights reserved.</span>
-      <span>Papurion</span>
+      <span>© 2026 Pie Nest Inc. · Papurion. All rights reserved.</span>
+      <span>Made with 水龍 in Seoul</span>
     </div>
   </div>
 </footer>
+
+<script>
+  // Subtle scroll reveal — no library, respects prefers-reduced-motion.
+  (function () {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      document.querySelectorAll('.reveal').forEach(function (el) { el.classList.add('in'); });
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+    document.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
+  })();
+</script>
 
 </body>
 </html>
